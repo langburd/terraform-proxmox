@@ -101,14 +101,6 @@ module "lxc_containers" {
   # Clone configuration
   clone = try(each.value.clone, null)
 
-  # Timeout configurations
-  timeout_clone  = try(each.value.timeout_clone, 1800)
-  timeout_create = try(each.value.timeout_create, 1800)
-  timeout_delete = try(each.value.timeout_delete, 60)
-  timeout_start  = try(each.value.timeout_start, 60)
-  timeout_stop   = try(each.value.timeout_stop, 60)
-  timeout_update = try(each.value.timeout_update, 1800)
-
   app_password = var.app_password
 }
 

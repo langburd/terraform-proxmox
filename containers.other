@@ -156,8 +156,6 @@
     #     enabled: true
     #     tty: 4
     #     type: "console"
-    #   timeout_create: 900
-    #   timeout_start: 120
 
     # # Minimal container for testing
     # test-container:
@@ -217,8 +215,6 @@
     #   startup:
     #     order: "2"
     #     up_delay: "45"
-    #   timeout_create: 1200
-    #   timeout_update: 900
 
     # Example: Container with Ansible configuration (recommended approach)
     # See LXC_CONFIGURATION_GUIDE.md for complete examples
