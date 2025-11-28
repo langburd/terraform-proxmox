@@ -1,3 +1,22 @@
+# Output container mount points
+output "container_mount_points" {
+  description = "Mount points for all containers"
+  value = {
+    for name, container in module.lxc_containers : name => {
+      mount_points = container.mount_points
+    }
+  }
+}
+
+# Output container network information
+output "container_networks" {
+  description = "Network configuration for all containers"
+  value = {
+    for name, container in module.lxc_containers : name => {
+      network_interfaces = container.network_interfaces
+    }
+  }
+}
 
 # Output container information
 output "containers" {
@@ -25,26 +44,6 @@ output "containers" {
       template         = container.template
       unprivileged     = container.unprivileged
       protection       = container.protection
-    }
-  }
-}
-
-# Output container network information
-output "container_networks" {
-  description = "Network configuration for all containers"
-  value = {
-    for name, container in module.lxc_containers : name => {
-      network_interfaces = container.network_interfaces
-    }
-  }
-}
-
-# Output container mount points
-output "container_mount_points" {
-  description = "Mount points for all containers"
-  value = {
-    for name, container in module.lxc_containers : name => {
-      mount_points = container.mount_points
     }
   }
 }

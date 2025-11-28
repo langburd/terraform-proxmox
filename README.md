@@ -1,12 +1,12 @@
-# Proxmox LXC Containers with OpenTofu
+# Proxmox LXC Containers with Terraform
 
-This repository contains an opinionated OpenTofu root configuration and a reusable LXC module that works with both Terraform and OpenTofu. It lets you describe containers once in `containers.yaml`, then create, update, and destroy them in a repeatable way, including optional automation for Docker-in-LXC on Proxmox versions affected by the AppArmor issue (CVE-2025-52881).
+This repository contains a Terraform root configuration and a reusable LXC module. It lets you describe containers once in `containers.yaml`, then create, update, and destroy them in a repeatable way, including optional automation for Docker-in-LXC on Proxmox versions affected by the AppArmor issue (CVE-2025-52881).
 
-The root configuration uses `.tofu` files and is intended to be executed with the `tofu` CLI only (not the `terraform` CLI). The `modules/lxc` submodule is written in standard HCL (`.tf`) and can be consumed from either Terraform or OpenTofu.
+The root configuration and `modules/lxc` submodule are written in standard HCL (`.tf`) and can be consumed from either Terraform or OpenTofu.
 
 ## Overview
 
-- Root configuration (`*.tofu` files) that:
+- Root configuration (`*.tf` files) that:
   - Parses `containers.yaml` into locals.
   - Invokes the `modules/lxc` Terraform module for each container.
   - Optionally downloads LXC OS templates and creates resource pools.
@@ -27,8 +27,8 @@ For detailed variable, provider, and output documentation, refer to `SPECS.md` (
   - Root module for orchestration, hooks, and infrastructure glue.
   - `modules/lxc` for the low-level container resource.
 - Optional Proxmox automation:
-  - Downloading standard LXC templates (`lxc-templates.tofu`).
-  - Managing Proxmox pools (`pools.tofu`).
+  - Downloading standard LXC templates (`lxc-templates.tf`).
+  - Managing Proxmox pools (`pools.tf`).
 - Docker-on-LXC support for Proxmox < 9.1:
   - Host-side AppArmor fix applied via `null_resource.docker_apparmor_fix` and `scripts/docker-apparmor-fix.sh`.
   - Alpine Docker LXC hook script (`scripts/alpine-docker-setup.sh`) uploaded as a Proxmox snippet and referenced from containers.
@@ -38,12 +38,12 @@ For detailed variable, provider, and output documentation, refer to `SPECS.md` (
 ```text
 terraform-proxmox/
 ├── containers.yaml          # Declarative container definitions (single source of truth)
-├── containers.tofu          # Root logic: parses YAML, calls modules/lxc, applies hooks
-├── lxc-templates.tofu       # Optional download of LXC OS templates
-├── pools.tofu               # Optional Proxmox resource pools
-├── providers.tofu           # Terraform/OpenTofu and provider configuration
-├── variables.tofu           # Root variables (endpoint, credentials, app_password, etc.)
-├── outputs.tofu             # Root outputs
+├── containers.tf            # Root logic: parses YAML, calls modules/lxc, applies hooks
+├── lxc-templates.tf         # Optional download of LXC OS templates
+├── pools.tf                 # Optional Proxmox resource pools
+├── providers.tf             # Terraform and provider configuration
+├── variables.tf             # Root variables (endpoint, credentials, app_password, etc.)
+├── outputs.tf               # Root outputs
 ├── modules/
 │   └── lxc/
 │       ├── main.tf          # LXC container resource implementation
@@ -54,19 +54,19 @@ terraform-proxmox/
 │   ├── alpine-docker-setup.sh   # LXC hookscript to provision Alpine Docker containers
 │   └── docker-apparmor-fix.sh   # Host-side AppArmor workaround for Docker in LXC
 ├── hooks/
-│   └── tfsort.sh            # Helper script to run tfsort on .tofu/.tf files
+│   └── tfsort.sh            # Helper script to run tfsort on .tf files
 ├── SPECS.md                 # Generated Terraform docs (providers, inputs, outputs, etc.)
 └── README.md                # This file
 ```
 
 ## Prerequisites
 
-- A Proxmox VE host or cluster reachable from where you run OpenTofu.
-- OpenTofu CLI (`tofu`) installed; the root configuration uses `.tofu` files and is not intended to be run with the `terraform` CLI.
+- A Proxmox VE host or cluster reachable from where you run Terraform.
+- Terraform CLI (`terraform`) installed.
 - Access credentials for the Proxmox API:
   - API endpoint (for example `https://your-proxmox-host:8006/api2/json`).
   - User with permission to manage LXC containers and snippets (for example `root@pam`).
-- SSH access from the machine running OpenTofu to the Proxmox host, if you enable the Docker AppArmor workaround (`docker_apparmor_fix`), because it is implemented with an SSH-based `null_resource`.
+- SSH access from the machine running Terraform to the Proxmox host, if you enable the Docker AppArmor workaround (`docker_apparmor_fix`), because it is implemented with an SSH-based `null_resource`.
 
 Exact provider versions, inputs, and outputs are documented in `SPECS.md`.
 
@@ -81,7 +81,7 @@ Exact provider versions, inputs, and outputs are documented in `SPECS.md`.
 
 2. **Configure Proxmox credentials**
 
-   Either export environment variables so OpenTofu can pick up the variables used in `providers.tofu`:
+   Either export environment variables so Terraform can pick up the variables used in `providers.tf`:
 
    ```bash
    export TF_VAR_endpoint="https://your-proxmox-host:8006/api2/json"
@@ -94,7 +94,7 @@ Exact provider versions, inputs, and outputs are documented in `SPECS.md`.
 
 3. **Review providers and inputs**
 
-   - Check `providers.tofu` and `variables.tofu` for how providers and root variables are defined.
+   - Check `providers.tf` and `variables.tf` for how providers and root variables are defined.
    - See `SPECS.md` for the generated list of providers, inputs, and outputs when it has been refreshed with `terraform-docs` (or similar).
 
 ## Basic usage
@@ -128,14 +128,14 @@ Exact provider versions, inputs, and outputs are documented in `SPECS.md`.
 2. **Initialize and plan**
 
    ```bash
-   tofu init
-   tofu plan
+   terraform init
+   terraform plan
    ```
 
 3. **Apply**
 
    ```bash
-   tofu apply
+   terraform apply
    ```
 
    This will:
@@ -160,6 +160,6 @@ The root configuration will:
 
 ## Further documentation
 
-- Module reference and configuration details (Terraform/OpenTofu module): `modules/lxc/README.md`.
+- Module reference and configuration details: `modules/lxc/README.md`.
 - Generated provider/module documentation (providers, modules, inputs, outputs): `SPECS.md`.
 - Script behaviour and advanced Docker/LXC handling: see comments inside `scripts/alpine-docker-setup.sh` and `scripts/docker-apparmor-fix.sh`.
