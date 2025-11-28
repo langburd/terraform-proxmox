@@ -7,7 +7,6 @@ resource "proxmox_virtual_environment_download_file" "lxc_img" {
   url          = each.value
 }
 
-
 locals {
   lxc_templates = {
     "alpine"   = "http://download.proxmox.com/images/system/alpine-3.22-default_20250617_amd64.tar.xz"

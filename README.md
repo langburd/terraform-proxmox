@@ -1,108 +1,165 @@
-# Terraform Proxmox LXC Container Module
+# Proxmox LXC Containers with OpenTofu
 
-This repository provides a comprehensive Terraform module for managing Proxmox LXC containers using a YAML-driven configuration approach.
+This repository contains an opinionated OpenTofu root configuration and a reusable LXC module that works with both Terraform and OpenTofu. It lets you describe containers once in `containers.yaml`, then create, update, and destroy them in a repeatable way, including optional automation for Docker-in-LXC on Proxmox versions affected by the AppArmor issue (CVE-2025-52881).
 
-## 🚀 Features
+The root configuration uses `.tofu` files and is intended to be executed with the `tofu` CLI only (not the `terraform` CLI). The `modules/lxc` submodule is written in standard HCL (`.tf`) and can be consumed from either Terraform or OpenTofu.
 
-- **YAML-Driven Configuration**: Single source of truth in `containers.yaml`
-- **Comprehensive Support**: All `proxmox_virtual_environment_container` resource arguments
-- **Flexible Deployment**: Support for both template-based and clone-based containers
-- **Advanced Networking**: Multiple network interfaces, VLANs, firewall configuration
-- **Storage Management**: Configurable disks and mount points
-- **Security Features**: Unprivileged containers, protection, access control
-- **Resource Management**: CPU, memory, and timeout configuration
-- **Container Features**: Nesting, FUSE, custom capabilities
-- **Startup Control**: Boot order and delay configuration
+## Overview
 
-## 📁 Project Structure
+- Root configuration (`*.tofu` files) that:
+  - Parses `containers.yaml` into locals.
+  - Invokes the `modules/lxc` Terraform module for each container.
+  - Optionally downloads LXC OS templates and creates resource pools.
+  - Manages Proxmox snippets and host-side scripts for Alpine Docker containers and the Docker AppArmor workaround.
+- Reusable `modules/lxc` module that wraps `proxmox_virtual_environment_container` with strong validation and a YAML-friendly input structure.
 
-```
+For detailed variable, provider, and output documentation, refer to `SPECS.md` (generated Terraform docs) and `modules/lxc/README.md`.
+
+## Main features
+
+- YAML-driven configuration via a single `containers.yaml` file.
+- Support for most `proxmox_virtual_environment_container` arguments, including:
+  - CPU, memory, disks, mount points.
+  - Initialization (hostname, networking, DNS, user account).
+  - Network interfaces and additional interfaces.
+  - Features, startup options, cloning, and timeouts.
+- Separation of concerns:
+  - Root module for orchestration, hooks, and infrastructure glue.
+  - `modules/lxc` for the low-level container resource.
+- Optional Proxmox automation:
+  - Downloading standard LXC templates (`lxc-templates.tofu`).
+  - Managing Proxmox pools (`pools.tofu`).
+- Docker-on-LXC support for Proxmox < 9.1:
+  - Host-side AppArmor fix applied via `null_resource.docker_apparmor_fix` and `scripts/docker-apparmor-fix.sh`.
+  - Alpine Docker LXC hook script (`scripts/alpine-docker-setup.sh`) uploaded as a Proxmox snippet and referenced from containers.
+
+## Project structure
+
+```text
 terraform-proxmox/
-├── modules/lxc/              # LXC container module
-│   ├── main.tf              # Container resource implementation
-│   ├── variables.tf         # Input variables with validation
-│   ├── outputs.tf           # Module outputs
-│   └── README.md            # Module documentation
-├── examples/complete/        # Complete usage example
-│   ├── main.tf              # Example implementation
-│   ├── containers.yaml      # Example container configurations
-│   └── README.md            # Example documentation
-├── containers.yaml          # Container definitions (single source of truth)
-├── containers.tf            # Root module calling LXC module
-├── providers.tofu           # Provider configuration
-├── variables.tofu           # Root module variables
-└── README.md               # This file
+├── containers.yaml          # Declarative container definitions (single source of truth)
+├── containers.tofu          # Root logic: parses YAML, calls modules/lxc, applies hooks
+├── lxc-templates.tofu       # Optional download of LXC OS templates
+├── pools.tofu               # Optional Proxmox resource pools
+├── providers.tofu           # Terraform/OpenTofu and provider configuration
+├── variables.tofu           # Root variables (endpoint, credentials, app_password, etc.)
+├── outputs.tofu             # Root outputs
+├── modules/
+│   └── lxc/
+│       ├── main.tf          # LXC container resource implementation
+│       ├── variables.tf     # Module inputs and validation
+│       ├── outputs.tf       # Module outputs
+│       └── README.md        # Module-level documentation
+├── scripts/
+│   ├── alpine-docker-setup.sh   # LXC hookscript to provision Alpine Docker containers
+│   └── docker-apparmor-fix.sh   # Host-side AppArmor workaround for Docker in LXC
+├── hooks/
+│   └── tfsort.sh            # Helper script to run tfsort on .tofu/.tf files
+├── SPECS.md                 # Generated Terraform docs (providers, inputs, outputs, etc.)
+└── README.md                # This file
 ```
 
-## 🛠️ Quick Start
+## Prerequisites
 
-### 1. Configure Provider
+- A Proxmox VE host or cluster reachable from where you run OpenTofu.
+- OpenTofu CLI (`tofu`) installed; the root configuration uses `.tofu` files and is not intended to be run with the `terraform` CLI.
+- Access credentials for the Proxmox API:
+  - API endpoint (for example `https://your-proxmox-host:8006/api2/json`).
+  - User with permission to manage LXC containers and snippets (for example `root@pam`).
+- SSH access from the machine running OpenTofu to the Proxmox host, if you enable the Docker AppArmor workaround (`docker_apparmor_fix`), because it is implemented with an SSH-based `null_resource`.
 
-Set your Proxmox credentials:
+Exact provider versions, inputs, and outputs are documented in `SPECS.md`.
 
-```bash
-export TF_VAR_endpoint="https://your-proxmox-host:8006/api2/json"
-export TF_VAR_username="root@pam"
-export TF_VAR_password="your-password"
-```
+## Setup
 
-### 2. Define Containers
+1. **Clone the repository**
 
-Edit `containers.yaml` to define your containers:
+   ```bash
+   git clone https://github.com/<your-org>/terraform-proxmox.git
+   cd terraform-proxmox
+   ```
 
-```yaml
-containers:
-  web-server:
-    node_name: "pve-node1"
-    description: "Web server container"
-    tags: ["web", "production"]
-    operating_system:
-      template_file_id: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
-      type: "debian"
-    disk:
-      datastore_id: "local-lvm"
-      size: 8
-    initialization:
-      hostname: "web-server"
-      ip_config:
-        ipv4:
-          address: "192.168.1.10/24"
-          gateway: "192.168.1.1"
-```
+2. **Configure Proxmox credentials**
 
-### 3. Deploy
+   Either export environment variables so OpenTofu can pick up the variables used in `providers.tofu`:
 
-```bash
-terraform init
-terraform plan
-terraform apply
-```
+   ```bash
+   export TF_VAR_endpoint="https://your-proxmox-host:8006/api2/json"
+   export TF_VAR_username="root@pam"
+   export TF_VAR_password="your-proxmox-host-root-password"
+   export TF_VAR_app_password="container-root-password"
+   ```
 
-## 📚 Documentation
+   or set the same variables in `terraform.tfvars`.
 
-### **Getting Started**
+3. **Review providers and inputs**
 
-- [Quick Start Guide](QUICK_START.md) - Get up and running quickly
-- [LXC Configuration Guide](LXC_CONFIGURATION_GUIDE.md) - Comprehensive configuration guide
-- [Module Documentation](modules/lxc/README.md) - Module reference
+   - Check `providers.tofu` and `variables.tofu` for how providers and root variables are defined.
+   - See `SPECS.md` for the generated list of providers, inputs, and outputs when it has been refreshed with `terraform-docs` (or similar).
 
-### **Important Limitations & Solutions**
+## Basic usage
 
-- [Cloning and Initialization](CLONING_AND_INITIALIZATION.md) - **READ THIS FIRST!** Explains why `initialization` doesn't work with cloning
-- [Converting Container to Template](CONVERTING_CONTAINER_TO_TEMPLATE.md) - How to convert containers to OS templates
-- [Quick Reference: Template Conversion](QUICK_REFERENCE_TEMPLATE_CONVERSION.md) - Quick commands
-- [Complete Solution Summary](COMPLETE_SOLUTION_SUMMARY.md) - Overview of all solutions
+1. **Describe containers in `containers.yaml`**
 
-### **Examples**
+   Minimal example:
 
-- [Complete Example](examples/complete/README.md) - Full working example
-- [OS Template vs Clone Comparison](examples/os-template-vs-clone-comparison.yaml) - Side-by-side comparison
+   ```yaml
+   containers:
+     web-server:
+       node_name: "pve-node1"
+       description: "Web server container"
+       tags: ["web", "production"]
+       operating_system:
+         template_file_id: "local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+         type: "debian"
+       disk:
+         datastore_id: "local-lvm"
+         size: 8
+       initialization:
+         hostname: "web-server"
+         ip_config:
+           ipv4:
+             address: "192.168.1.10/24"
+             gateway: "192.168.1.1"
+   ```
 
-### **Scripts**
+   See `modules/lxc/README.md` for the full set of supported fields and structures.
 
-- [Convert Container to Template](scripts/convert-container-to-template.sh) - Automated conversion script
+2. **Initialize and plan**
 
-### **External Resources**
+   ```bash
+   tofu init
+   tofu plan
+   ```
 
-- [Proxmox Provider Documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs)
-- [Proxmox LXC Documentation](https://pve.proxmox.com/wiki/Linux_Container)
+3. **Apply**
+
+   ```bash
+   tofu apply
+   ```
+
+   This will:
+
+   - Parse `containers.yaml`.
+   - Create or update LXC containers via the `modules/lxc` module.
+   - Upload the Alpine Docker hook script as a snippet.
+   - Apply the Docker AppArmor workaround for any containers that have `docker_apparmor_fix` enabled in `containers.yaml`.
+
+## Docker and hookscript integration (optional)
+
+If you run Docker inside LXC containers on Proxmox versions affected by the AppArmor issue:
+
+- Mark affected containers in `containers.yaml` with a `docker_apparmor_fix` flag.
+- Configure their networking and `features` to allow nesting, as described in `modules/lxc/README.md`.
+- Optionally configure a hook script (for example the Alpine Docker setup script) by setting `hook_script_file_id` in the container definition so it points at the snippet created by `proxmox_virtual_environment_file.alpine_docker_setup`.
+
+The root configuration will:
+
+- Upload `scripts/alpine-docker-setup.sh` as a Proxmox snippet.
+- Run `scripts/docker-apparmor-fix.sh` on the Proxmox host via `null_resource.docker_apparmor_fix` before the first start of marked containers.
+
+## Further documentation
+
+- Module reference and configuration details (Terraform/OpenTofu module): `modules/lxc/README.md`.
+- Generated provider/module documentation (providers, modules, inputs, outputs): `SPECS.md`.
+- Script behaviour and advanced Docker/LXC handling: see comments inside `scripts/alpine-docker-setup.sh` and `scripts/docker-apparmor-fix.sh`.
