@@ -1,8 +1,7 @@
 # Parse containers.yaml file
 locals {
-  containers_yaml = yamldecode(file("${path.root}/containers.yaml"))
   containers      = local.containers_yaml.containers
-
+  containers_yaml = yamldecode(file("${path.root}/containers.yaml"))
   # Filter containers that need Docker AppArmor workaround
   # This is needed for Proxmox < 9.1 where Docker in LXC has AppArmor issues
   docker_containers = {
@@ -120,21 +119,6 @@ resource "proxmox_virtual_environment_file" "alpine_docker_setup" {
     file_name = "alpine-docker-setup.sh"
   }
 }
-
-# =============================================================================
-# Docker AppArmor Workaround for Proxmox < 9.1
-# =============================================================================
-# This null_resource applies the AppArmor workaround for Docker in LXC containers
-# on Proxmox versions before 9.1. The issue is caused by CVE-2025-52881 fix in runc
-# which interacts badly with AppArmor profiles in nested containers.
-#
-# The workaround:
-# 1. Stops the container
-# 2. Adds AppArmor configuration to /etc/pve/lxc/<VMID>.conf
-# 3. Starts the container
-#
-# See: https://github.com/opencontainers/runc/issues/4968
-# =============================================================================
 
 resource "null_resource" "docker_apparmor_fix" {
   for_each = local.docker_containers
