@@ -1,0 +1,255 @@
+---
+# containers:
+#   pihole1:
+#     node_name: "hpelite32"
+#     description: "PiHole server 1"
+#     tags: ["pihole", "production"]
+#     operating_system:
+#       template_file_id: "lenovo16-hdd:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+#       type: "debian"
+#     disk:
+#       datastore_id: "lenovo16-ssd"
+#       size: 20
+#     initialization:
+#       hostname: "pihole1"
+#       dns:
+#         servers: ["192.168.8.1"]
+#       ip_config:
+#         ipv4:
+#           address: "192.168.9.153/23"
+#           gateway: "192.168.8.1"
+#       user_account:
+#         keys:
+#           - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChfZryPRwPcle2fzNjZkjzDiTLOLBvDAx+Vj1zyMEMkoTGA7e8t0p6uuuQaL1ifunjlN7WvhTbvJYy4YNU1/YCN8g99SvZHpJxRDq0qti9W2DUeSdagw6+wSL0ZLseLbDpT4QMJzuGM8y/nkJVUcxTg08GGhDzLdjLxQRI37CTsrt3mShEnf0wp+SYC0hYjKXdYQo27VBNIIsa/MuuOfhgvg7lqM2vvQhCD/8MjHtwOZe8ae342JbK6bzyfBscLbXhxIw2+cIV8MFmvG4DeMCg71h1xfNR8ic9XW9OeW6nJZz4Fm1uysSZnrc24jsoNRl1taWPoCY/S3EvGzM+Hlxz avi@langburd.com"
+#     memory:
+#       dedicated: 2048
+#       swap: 512
+#     pool_id: "production"
+#     unprivileged: true
+
+    # pihole2:
+    #   node_name: "macmini8"
+    #   description: "PiHole server 2"
+    #   tags: ["pihole", "production"]
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+    #     type: "debian"
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 20
+    #   initialization:
+    #     hostname: "pihole2"
+    #     dns:
+    #       servers: ["192.168.8.1"]
+    #     ip_config:
+    #       ipv4:
+    #         address: "192.168.9.253/23"
+    #         gateway: "192.168.8.1"
+    #     user_account:
+    #       keys:
+    #         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChfZryPRwPcle2fzNjZkjzDiTLOLBvDAx+Vj1zyMEMkoTGA7e8t0p6uuuQaL1ifunjlN7WvhTbvJYy4YNU1/YCN8g99SvZHpJxRDq0qti9W2DUeSdagw6+wSL0ZLseLbDpT4QMJzuGM8y/nkJVUcxTg08GGhDzLdjLxQRI37CTsrt3mShEnf0wp+SYC0hYjKXdYQo27VBNIIsa/MuuOfhgvg7lqM2vvQhCD/8MjHtwOZe8ae342JbK6bzyfBscLbXhxIw2+cIV8MFmvG4DeMCg71h1xfNR8ic9XW9OeW6nJZz4Fm1uysSZnrc24jsoNRl1taWPoCY/S3EvGzM+Hlxz avi@langburd.com"
+    #   memory:
+    #     dedicated: 2048
+    #     swap: 512
+    #   pool_id: "production"
+
+    # # Database container with advanced configuration
+    # database:
+    #   node_name: "hpelite32"
+    #   vm_id: 201
+    #   description: "PostgreSQL database container"
+    #   tags: ["database", "postgresql", "production"]
+    #   unprivileged: true
+    #   protection: false
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+    #     type: "ubuntu"
+    #   cpu:
+    #     cores: 4
+    #     units: 2048
+    #   memory:
+    #     dedicated: 2048
+    #     swap: 1024
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 20
+    #   network_interface:
+    #     name: "veth0"
+    #     bridge: "vmbr0"
+    #     firewall: true
+    #     # vlan_id: 100
+    #   # additional_network_interfaces:
+    #   #   - name: "veth1"
+    #   #     bridge: "vmbr1"
+    #   #     firewall: false
+    #   #     vlan_id: 200
+    #   initialization:
+    #     hostname: "db-server"
+    #     dns:
+    #       servers: ["192.168.8.1"]
+    #       domain: "db.local"
+    #     ip_config:
+    #       ipv4:
+    #         address: "192.168.9.20/23"
+    #         gateway: "192.168.8.1"
+    #       ipv6:
+    #         address: "2001:db8::20/64"
+    #         gateway: "2001:db8::1"
+    #     user_account:
+    #       keys:
+    #         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChfZryPRwPcle2fzNjZkjzDiTLOLBvDAx+Vj1zyMEMkoTGA7e8t0p6uuuQaL1ifunjlN7WvhTbvJYy4YNU1/YCN8g99SvZHpJxRDq0qti9W2DUeSdagw6+wSL0ZLseLbDpT4QMJzuGM8y/nkJVUcxTg08GGhDzLdjLxQRI37CTsrt3mShEnf0wp+SYC0hYjKXdYQo27VBNIIsa/MuuOfhgvg7lqM2vvQhCD/8MjHtwOZe8ae342JbK6bzyfBscLbXhxIw2+cIV8MFmvG4DeMCg71h1xfNR8ic9XW9OeW6nJZz4Fm1uysSZnrc24jsoNRl1taWPoCY/S3EvGzM+Hlxz avi@langburd.com"
+    #   # mount_point:
+    #   #   - volume: "lenovo16-hdd:vm-201-disk-1"
+    #   #     path: "/var/lib/postgresql"
+    #   #     size: "50G"
+    #   #     backup: true
+    #   #     quota: true
+    #   #   - volume: "lenovo16-hdd:vm-201-disk-2"
+    #   #     path: "/backup"
+    #   #     size: "20G"
+    #   #     backup: false
+    #   #     read_only: false
+    #   features:
+    #     nesting: true
+    #     fuse: true
+    #     keyctl: true
+    #     mount: ["nfs"]
+    #   startup:
+    #     order: "1"
+    #     up_delay: "30"
+    #     down_delay: "60"
+    #   pool_id: "production"
+
+    # # Development container with template cloning
+    # dev-environment:
+    #   node_name: "hpelite32"
+    #   description: "Development environment"
+    #   tags: ["development", "testing"]
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/alpine-3.19-default_20240207_amd64.tar.xz"
+    #     type: "alpine"
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 20
+    #   # clone:
+    #   #   vm_id: 9000  # Template VM ID
+    #   #   datastore_id: "lenovo16-ssd"
+    #   #   full: false
+    #   cpu:
+    #     cores: 2
+    #     units: 1024
+    #   memory:
+    #     dedicated: 2048
+    #     swap: 512
+    #   initialization:
+    #     hostname: "dev-env"
+    #     dns:
+    #       servers: ["192.168.8.1"]
+    #     ip_config:
+    #       ipv4:
+    #         address: "192.168.9.30/23"
+    #         gateway: "192.168.8.1"
+    #     user_account:
+    #       keys:
+    #         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChfZryPRwPcle2fzNjZkjzDiTLOLBvDAx+Vj1zyMEMkoTGA7e8t0p6uuuQaL1ifunjlN7WvhTbvJYy4YNU1/YCN8g99SvZHpJxRDq0qti9W2DUeSdagw6+wSL0ZLseLbDpT4QMJzuGM8y/nkJVUcxTg08GGhDzLdjLxQRI37CTsrt3mShEnf0wp+SYC0hYjKXdYQo27VBNIIsa/MuuOfhgvg7lqM2vvQhCD/8MjHtwOZe8ae342JbK6bzyfBscLbXhxIw2+cIV8MFmvG4DeMCg71h1xfNR8ic9XW9OeW6nJZz4Fm1uysSZnrc24jsoNRl1taWPoCY/S3EvGzM+Hlxz avi@langburd.com"
+    #   console:
+    #     enabled: true
+    #     tty: 4
+    #     type: "console"
+    #   timeout_create: 900
+    #   timeout_start: 120
+
+    # # Minimal container for testing
+    # test-container:
+    #   node_name: "macmini8"
+    #   description: "Minimal test container"
+    #   tags: ["test"]
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/alpine-3.19-default_20240207_amd64.tar.xz"
+    #     type: "alpine"
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 2
+    #   started: false
+    #   initialization:
+    #     hostname: "test"
+    #     ip_config:
+    #       ipv4:
+    #         address: "dhcp"
+
+    # # Container with custom features and hook scripts
+    # monitoring:
+    #   node_name: "hpelite32"
+    #   description: "Monitoring and logging container"
+    #   tags: ["monitoring", "prometheus", "grafana"]
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+    #     type: "debian"
+    #   cpu:
+    #     cores: 2
+    #     units: 1536
+    #   memory:
+    #     dedicated: 3072
+    #     swap: 256
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 15
+    #   network_interface:
+    #     name: "veth0"
+    #     bridge: "vmbr0"
+    #     mtu: 1450
+    #     rate_limit: 100
+    #   initialization:
+    #     hostname: "monitoring"
+    #     dns:
+    #       servers: ["192.168.8.1", "1.1.1.1"]
+    #     ip_config:
+    #       ipv4:
+    #         address: "192.168.9.40/23"
+    #         gateway: "192.168.8.1"
+    #     user_account:
+    #       keys:
+    #         - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQChfZryPRwPcle2fzNjZkjzDiTLOLBvDAx+Vj1zyMEMkoTGA7e8t0p6uuuQaL1ifunjlN7WvhTbvJYy4YNU1/YCN8g99SvZHpJxRDq0qti9W2DUeSdagw6+wSL0ZLseLbDpT4QMJzuGM8y/nkJVUcxTg08GGhDzLdjLxQRI37CTsrt3mShEnf0wp+SYC0hYjKXdYQo27VBNIIsa/MuuOfhgvg7lqM2vvQhCD/8MjHtwOZe8ae342JbK6bzyfBscLbXhxIw2+cIV8MFmvG4DeMCg71h1xfNR8ic9XW9OeW6nJZz4Fm1uysSZnrc24jsoNRl1taWPoCY/S3EvGzM+Hlxz avi@langburd.com"
+    #   features:
+    #     nesting: false
+    #     fuse: false
+    #   hook_script_file_id: "lenovo16-hdd:snippets/monitoring-setup.sh"
+    #   startup:
+    #     order: "2"
+    #     up_delay: "45"
+    #   timeout_create: 1200
+    #   timeout_update: 900
+
+    # Example: Container with Ansible configuration (recommended approach)
+    # See LXC_CONFIGURATION_GUIDE.md for complete examples
+    #
+    # Step 1: Deploy container with Terraform
+    # web-server:
+    #   node_name: "hpelite32"
+    #   description: "Web server configured with Ansible"
+    #   tags: ["web", "nginx", "production"]
+    #   operating_system:
+    #     template_file_id: "lenovo16-hdd:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst"
+    #     type: "debian"
+    #   disk:
+    #     datastore_id: "lenovo16-ssd"
+    #     size: 20
+    #   cpu:
+    #     cores: 2
+    #   memory:
+    #     dedicated: 2048
+    #     swap: 512
+    #   initialization:
+    #     hostname: "web-server"
+    #     dns:
+    #       servers: ["192.168.8.1"]
+    #     ip_config:
+    #       ipv4:
+    #         address: "192.168.9.100/23"
+    #         gateway: "192.168.8.1"
+    #     user_account:
+    #       keys:
+    #         - "ssh-rsa AAAAB3Nza... your-key-here"
+    #
+    # Step 2: Configure with Ansible after deployment
+    # ansible-playbook -i inventory.yml configure-web-server.yml
