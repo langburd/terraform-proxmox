@@ -76,6 +76,26 @@ case "$PHASE" in
         log "Installing essential packages..."
         exec_in_container "apk add --no-cache bind-tools openssh tzdata curl bash nano net-tools mc" "Installing base packages" || exit 1
 
+        # Install Python 3 and Ansible prerequisites
+        # These packages are required for Ansible to run playbooks on this container:
+        # - python3: Python interpreter required by Ansible modules
+        # - py3-pip: Python package manager for installing additional Python dependencies
+        # - python3-dev: Development headers needed for compiling Python extensions
+        # - libffi-dev: Required for some Ansible modules that use cffi
+        # - openssl-dev: Required for cryptography-related Ansible operations
+        # - musl-dev: C library development files needed for Python package compilation
+        # - gcc: Compiler needed for building Python packages from source
+        log "Installing Python 3 and Ansible prerequisites..."
+        exec_in_container "apk add --no-cache python3 py3-pip python3-dev libffi-dev openssl-dev musl-dev gcc" "Installing Python 3 and Ansible prerequisites" || exit 1
+
+        # Ensure python3 is available at /usr/bin/python3 (create symlink if needed)
+        # Alpine may install python3 in different locations depending on version
+        exec_in_container "[ -f /usr/bin/python3 ] || ln -sf \$(which python3) /usr/bin/python3" "Ensuring python3 symlink"
+
+        # Verify Python installation
+        PYTHON_VERSION=$(pct exec "$VMID" -- python3 --version 2>/dev/null || echo "unknown")
+        log "Python version: $PYTHON_VERSION"
+
         # Configure and start SSH
         log "Configuring SSH..."
         exec_in_container "rc-update add sshd default" "Enabling sshd at boot"
@@ -99,6 +119,7 @@ case "$PHASE" in
 
         log "========================================"
         log "Alpine Docker container setup complete!"
+        log "Python: $PYTHON_VERSION"
         log "Docker: $DOCKER_VERSION"
         log "Docker Compose: $COMPOSE_VERSION"
         log "========================================"
