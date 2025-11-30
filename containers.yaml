@@ -1,5 +1,29 @@
 ---
 containers:
+  uptime-kuma:
+    description: Uptime Kuma monitoring
+    docker_apparmor_fix: true
+    hook_script_file_id: lenovo16-hdd:snippets/alpine-docker-setup.sh
+    initialization:
+      dns:
+        servers:
+          - 192.168.8.1
+      hostname: uptime-kuma
+      ip_config:
+        ipv4:
+          address: 192.168.9.180/23
+          gateway: 192.168.8.1
+    mount_point:
+      - path: /opt/uptime-kuma
+        volume: /mnt/pve/lenovo16-ssd/data/uptime-kuma
+    node_name: hpelite32
+    operating_system:
+      template_file_id: lenovo16-hdd:vztmpl/alpine-3.22-default_20250617_amd64.tar.xz
+      type: alpine
+    pool_id: production
+    tags:
+      - production
+      - monitoring
   wg-easy:
     description: WireGuard VPN server
     # Enable Docker AppArmor workaround for Proxmox < 9.1
