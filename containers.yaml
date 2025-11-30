@@ -17,9 +17,6 @@ containers:
       - path: /opt/uptime-kuma
         volume: /mnt/pve/lenovo16-ssd/data/uptime-kuma
     node_name: hpelite32
-    operating_system:
-      template_file_id: lenovo16-hdd:vztmpl/alpine-3.22-default_20250617_amd64.tar.xz
-      type: alpine
     pool_id: production
     tags:
       - production
@@ -41,9 +38,6 @@ containers:
           address: 192.168.9.170/23
           gateway: 192.168.8.1
     node_name: hpelite32
-    operating_system:
-      template_file_id: lenovo16-hdd:vztmpl/alpine-3.22-default_20250617_amd64.tar.xz
-      type: alpine
     pool_id: production
     tags:
       - production

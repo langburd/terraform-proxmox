@@ -35,8 +35,8 @@ module "lxc_containers" {
 
   # Operating system configuration (only if not cloning)
   operating_system = try(each.value.clone, null) == null ? {
-    template_file_id = each.value.operating_system.template_file_id
-    type             = try(each.value.operating_system.type, "debian")
+    template_file_id = try(each.value.operating_system.template_file_id, proxmox_virtual_environment_download_file.lxc_img[try(each.value.operating_system.type, "alpine")].id)
+    type             = try(each.value.operating_system.type, "alpine")
   } : null
 
   # CPU configuration
