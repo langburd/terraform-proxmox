@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // empty' | { read -r f; [[ \"$f\" =~ \\.(tofu|tf)$ ]] && tofu fmt \"$f\" && tfsort \"$f\"; } 2>/dev/null || true",
+            "statusMessage": "Formatting HCL...",
+            "timeout": 30,
+            "type": "command"
+          },
+          {
+            "command": "jq -r '.tool_input.file_path // .tool_response.filePath // empty' | { read -r f; [[ \"$f\" =~ \\.(yaml|yml)$ ]] && yamlfmt \"$f\"; } 2>/dev/null || true",
+            "statusMessage": "Formatting YAML...",
+            "timeout": 30,
+            "type": "command"
+          }
+        ],
+        "matcher": "Write|Edit"
+      }
+    ]
+  }
+}
