@@ -52,4 +52,4 @@ terraform-docs .
 
 - Branch naming: `kebab-case` feature branches (e.g., `add-pihole`, `fix-memory-defaults`)
 - PRs target `master`; pre-commit hooks block direct commits to `master`
-- Pre-commit enforces: `terraform fmt`, `tflint`, `tfsort`, `yamlfmt`, `yamllint`, `gitleaks`, file size limits
+- Pre-commit enforces: `tofu fmt`, `tflint`, `tfsort`, `yamlfmt`, `yamllint`, `gitleaks`, file size limits
