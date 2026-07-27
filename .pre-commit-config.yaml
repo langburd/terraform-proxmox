@@ -6,7 +6,7 @@ minimum_pre_commit_version: 2.15.0
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b # v5.0.0
+    rev: v6.0.0 # v5.0.0
     hooks:
       # Git hooks
       - id: check-added-large-files
@@ -67,7 +67,7 @@ repos:
 
   # Terraform
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: c0f51014b8ec51c4455a7dac40697be15e285668 # v1.99.5
+    rev: v1.108.1 # v1.99.5
     hooks:
       - id: terraform_fmt
         args:
@@ -93,18 +93,18 @@ repos:
 
   # Gitleaks
   - repo: https://github.com/gitleaks/gitleaks
-    rev: c7acf33d962e8effc070072f993c365af19e3661 # v8.27.2
+    rev: v8.30.0 # v8.27.2
     hooks:
       - id: gitleaks
 
   # YAML
   - repo: https://github.com/google/yamlfmt
-    rev: 398e72ad8473251b65d9da2cbd43a4b92a61fab7 # v0.17.2
+    rev: v0.21.0 # v0.17.2
     hooks:
       - id: yamlfmt
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: 79a6b2b1392eaf49cdd32ac4f14be1a809bbd8f7 # v1.37.1
+    rev: v1.38.0 # v1.37.1
     hooks:
       - id: yamllint
         args:
